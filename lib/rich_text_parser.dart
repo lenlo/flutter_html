@@ -163,6 +163,7 @@ class HtmlRichTextParser extends StatelessWidget {
     this.imageProperties,
     this.onImageTap,
     this.showImages = true,
+    this.textScaleFactor = 1.0,
   });
 
   final double indentSize = 10.0;
@@ -179,6 +180,7 @@ class HtmlRichTextParser extends StatelessWidget {
   final ImageProperties imageProperties;
   final OnTap onImageTap;
   final bool showImages;
+  final double textScaleFactor;
 
   // style elements set a default style
   // for all child nodes
@@ -428,12 +430,13 @@ class HtmlRichTextParser extends StatelessWidget {
             child: RichText(
               textAlign: TextAlign.left,
               text: span,
+              textScaleFactor: textScaleFactor,
             ),
           );
           parseContext.rootWidgetList.add(blockText);
         } else {
           parseContext.rootWidgetList.add(BlockText(
-            child: RichText(text: span),
+            child: RichText(text: span, textScaleFactor: textScaleFactor),
             shrinkToFit: shrinkToFit,
           ));
         }
@@ -605,7 +608,7 @@ class HtmlRichTextParser extends StatelessWidget {
                   shrinkToFit: shrinkToFit,
                   margin: EdgeInsets.only(
                       left: parseContext.indentLevel * indentSize, top: 10.0),
-                  child: RichText(text: span),
+                  child: RichText(text: span, textScaleFactor: textScaleFactor),
                 );
                 parseContext.rootWidgetList.add(blockElement);
                 nextContext.inBlock = true;
@@ -654,7 +657,8 @@ class HtmlRichTextParser extends StatelessWidget {
                     ? FontWeight.bold
                     : FontWeight.normal));
             RichText text =
-                RichText(text: TextSpan(text: '', children: <TextSpan>[]));
+              RichText(text: TextSpan(text: '', children: <TextSpan>[]),
+                textScaleFactor: textScaleFactor);
             Expanded cell = Expanded(
               flex: colspan,
               child: Container(padding: EdgeInsets.all(1.0), child: text),
@@ -683,7 +687,7 @@ class HtmlRichTextParser extends StatelessWidget {
             // create an expanded cell
             RichText text = RichText(
                 textAlign: TextAlign.center,
-                textScaleFactor: 1.2,
+                textScaleFactor: 1.2 * textScaleFactor,
                 text: TextSpan(text: '', children: <TextSpan>[]));
             Expanded cell = Expanded(
               child: Container(padding: EdgeInsets.all(2.0), child: text),
@@ -803,6 +807,7 @@ class HtmlRichTextParser extends StatelessWidget {
                           return BlockText(
                             child: RichText(
                               textAlign: TextAlign.center,
+                              textScaleFactor: textScaleFactor,
                               text: TextSpan(
                                 text: node.attributes['alt'],
                                 style: nextContext.childStyle,
@@ -855,6 +860,7 @@ class HtmlRichTextParser extends StatelessWidget {
                           return BlockText(
                             child: RichText(
                               textAlign: TextAlign.center,
+                              textScaleFactor: textScaleFactor,
                               text: TextSpan(
                                 text: node.attributes['alt'],
                                 style: nextContext.childStyle,
@@ -917,6 +923,7 @@ class HtmlRichTextParser extends StatelessWidget {
                     TextSpan(text: '', style: nextContext.childStyle)
                   ],
                 ),
+                textScaleFactor: textScaleFactor,
               ),
             );
             parseContext.rootWidgetList.add(blockText);
@@ -990,6 +997,7 @@ class HtmlRichTextParser extends StatelessWidget {
               decoration: decoration,
               child: RichText(
                 textAlign: textAlign,
+                textScaleFactor: textScaleFactor,
                 text: TextSpan(
                   text: '',
                   style: nextContext.childStyle,

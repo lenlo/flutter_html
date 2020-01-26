@@ -31,6 +31,7 @@ class HtmlParser extends StatelessWidget {
   final Map<String, Style> style;
   final Map<String, CustomRender> customRender;
   final List<String> blacklistedElements;
+  final double textScaleFactor;
 
   HtmlParser({
     @required this.htmlData,
@@ -42,6 +43,7 @@ class HtmlParser extends StatelessWidget {
     this.style,
     this.customRender,
     this.blacklistedElements,
+    this.textScaleFactor,
   });
 
   @override
@@ -67,7 +69,7 @@ class HtmlParser extends StatelessWidget {
       cleanedTree,
     );
 
-    return RichText(text: parsedTree);
+    return RichText(text: parsedTree, textScaleFactor: textScaleFactor);
   }
 
   /// [parseHTML] converts a string of HTML to a DOM document using the dart `html` library.

@@ -59,6 +59,7 @@ class Html extends StatelessWidget {
     @deprecated this.showImages = true,
     this.blacklistedElements = const [],
     this.style,
+    this.textScaleFactor = 1.0,
   }) : super(key: key);
 
   final String data;
@@ -91,6 +92,9 @@ class Html extends StatelessWidget {
   /// Fancy New Parser parameters
   final Map<String, Style> style;
 
+  // TextScaleFactor to pass along to all RichTexts that we create
+  final double textScaleFactor;
+
   @override
   Widget build(BuildContext context) {
     final double width = shrinkWrap ? null : MediaQuery.of(context).size.width;
@@ -115,6 +119,7 @@ class Html extends StatelessWidget {
             imageProperties: imageProperties,
             onImageTap: onImageTap,
             showImages: showImages,
+            textScaleFactor: textScaleFactor,
           ),
         ),
       );
@@ -133,6 +138,7 @@ class Html extends StatelessWidget {
         style: style,
         customRender: customRender,
         blacklistedElements: blacklistedElements,
+        textScaleFactor: textScaleFactor,
       ),
     );
   }
