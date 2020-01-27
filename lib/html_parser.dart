@@ -32,6 +32,7 @@ class HtmlParser extends StatelessWidget {
   final Map<String, CustomRender> customRender;
   final List<String> blacklistedElements;
   final double textScaleFactor;
+  final Uri baseUrl;
 
   HtmlParser({
     @required this.htmlData,
@@ -44,7 +45,8 @@ class HtmlParser extends StatelessWidget {
     this.customRender,
     this.blacklistedElements,
     this.textScaleFactor,
-  });
+    baseUrl,
+  }) : baseUrl = baseUrl is String ? Uri.parse(baseUrl) : baseUrl as Uri;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +85,7 @@ class HtmlParser extends StatelessWidget {
   }
 
   /// [lexDomTree] converts a DOM document to a simplified tree of [StyledElement]s.
-  static StyledElement lexDomTree(
+  StyledElement lexDomTree(
     dom.Document html,
     List<String> customRenderTags,
     List<String> blacklistedElements,
@@ -106,7 +108,7 @@ class HtmlParser extends StatelessWidget {
   ///
   /// It runs the parse functions of every type of
   /// element and returns a [StyledElement] tree representing the element.
-  static StyledElement _recursiveLexer(
+  StyledElement _recursiveLexer(
     dom.Node node,
     List<String> customRenderTags,
     List<String> blacklistedElements,
@@ -126,9 +128,9 @@ class HtmlParser extends StatelessWidget {
       if (STYLED_ELEMENTS.contains(node.localName)) {
         return parseStyledElement(node, children);
       } else if (INTERACTABLE_ELEMENTS.contains(node.localName)) {
-        return parseInteractableElement(node, children);
+        return parseInteractableElement(node, children, _effectiveUrl);
       } else if (REPLACED_ELEMENTS.contains(node.localName)) {
-        return parseReplacedElement(node);
+        return parseReplacedElement(node, _effectiveUrl);
       } else if (LAYOUT_ELEMENTS.contains(node.localName)) {
         return parseLayoutElement(node, children);
       } else if (TABLE_STYLE_ELEMENTS.contains(node.localName)) {
@@ -641,6 +643,14 @@ class HtmlParser extends StatelessWidget {
       _processFontSize(child);
     });
     return tree;
+  }
+
+  String _effectiveUrl(String url) {
+    if (baseUrl == null || url == null) {
+      return url;
+    } else {
+      return baseUrl.resolve(url).toString();
+    }
   }
 }
 

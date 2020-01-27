@@ -164,7 +164,8 @@ class HtmlRichTextParser extends StatelessWidget {
     this.onImageTap,
     this.showImages = true,
     this.textScaleFactor = 1.0,
-  });
+    baseUrl,
+  }) : baseUrl = baseUrl is String ? Uri.parse(baseUrl) : baseUrl as Uri;
 
   final double indentSize = 10.0;
 
@@ -181,6 +182,7 @@ class HtmlRichTextParser extends StatelessWidget {
   final OnTap onImageTap;
   final bool showImages;
   final double textScaleFactor;
+  final Uri baseUrl;
 
   // style elements set a default style
   // for all child nodes
@@ -580,7 +582,7 @@ class HtmlRichTextParser extends StatelessWidget {
             // if this item has block children, we create
             // a container and gesture recognizer for the entire
             // element, otherwise, we create a LinkTextSpan
-            String url = node.attributes['href'] ?? null;
+            String url = _effectiveUrl(node.attributes['href']);
 
             if (_hasBlockChild(node)) {
               LinkBlock linkContainer = LinkBlock(
@@ -781,13 +783,11 @@ class HtmlRichTextParser extends StatelessWidget {
                       repeat: imageProperties?.repeat ?? ImageRepeat.noRepeat,
                       semanticLabel: imageProperties?.semanticLabel,
                       excludeFromSemantics:
-                          (imageProperties?.semanticLabel == null)
-                              ? true
-                              : false,
+                          (imageProperties?.semanticLabel == null),
                     ),
                     onTap: () {
                       if (onImageTap != null) {
-                        onImageTap(node.attributes['src']);
+                        onImageTap(_effectiveUrl(node.attributes['src']));
                       }
                     },
                   ));
@@ -837,8 +837,6 @@ class HtmlRichTextParser extends StatelessWidget {
                       semanticLabel: imageProperties?.semanticLabel,
                       excludeFromSemantics:
                           (imageProperties?.semanticLabel == null)
-                              ? true
-                              : false,
                     ),
                     onTap: () {
                       if (onImageTap != null) {
@@ -847,14 +845,15 @@ class HtmlRichTextParser extends StatelessWidget {
                     },
                   ));
                 } else {
+                  String imageUrl = _effectiveUrl(node.attributes['src']);
                   precacheImage(
-                    NetworkImage(node.attributes['src']),
+                    NetworkImage(imageUrl),
                     buildContext,
                     onError: onImageError ?? (_, __) {},
                   );
                   parseContext.rootWidgetList.add(GestureDetector(
                     child: Image.network(
-                      node.attributes['src'],
+                      imageUrl,
                       frameBuilder: (context, child, frame, _) {
                         if (node.attributes['alt'] != null && frame == null) {
                           return BlockText(
@@ -895,7 +894,7 @@ class HtmlRichTextParser extends StatelessWidget {
                     ),
                     onTap: () {
                       if (onImageTap != null) {
-                        onImageTap(node.attributes['src']);
+                        onImageTap(imageUrl);
                       }
                     },
                   ));
@@ -1032,5 +1031,13 @@ class HtmlRichTextParser extends StatelessWidget {
       stringToTrim = stringToTrim.replaceAll("  ", " ");
     }
     return stringToTrim;
+  }
+
+  String _effectiveUrl(String url) {
+    if (baseUrl == null || url == null) {
+      return url;
+    } else {
+      return baseUrl.resolve(url).toString();
+    }
   }
 }

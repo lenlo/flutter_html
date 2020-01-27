@@ -60,6 +60,7 @@ class Html extends StatelessWidget {
     this.blacklistedElements = const [],
     this.style,
     this.textScaleFactor = 1.0,
+    this.baseUrl,
   }) : super(key: key);
 
   final String data;
@@ -95,6 +96,9 @@ class Html extends StatelessWidget {
   // TextScaleFactor to pass along to all RichTexts that we create
   final double textScaleFactor;
 
+  // The page's base URL with which all relative URLs should be merged
+  final String baseUrl;
+
   @override
   Widget build(BuildContext context) {
     final double width = shrinkWrap ? null : MediaQuery.of(context).size.width;
@@ -120,6 +124,7 @@ class Html extends StatelessWidget {
             onImageTap: onImageTap,
             showImages: showImages,
             textScaleFactor: textScaleFactor,
+            baseUrl: baseUrl,
           ),
         ),
       );
@@ -139,6 +144,7 @@ class Html extends StatelessWidget {
         customRender: customRender,
         blacklistedElements: blacklistedElements,
         textScaleFactor: textScaleFactor,
+        baseUrl: baseUrl,
       ),
     );
   }

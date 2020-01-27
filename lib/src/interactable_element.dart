@@ -22,7 +22,8 @@ enum Gesture {
 }
 
 InteractableElement parseInteractableElement(
-    dom.Element element, List<StyledElement> children) {
+    dom.Element element, List<StyledElement> children,
+    String urlFilter(String url)) {
   InteractableElement interactableElement = InteractableElement(
     name: element.localName,
     children: children,
@@ -31,7 +32,7 @@ InteractableElement parseInteractableElement(
 
   switch (element.localName) {
     case "a":
-      interactableElement.href = element.attributes['href'];
+      interactableElement.href = urlFilter(element.attributes['href']);
       interactableElement.style = Style(
         color: Colors.blue,
         textDecoration: TextDecoration.underline,

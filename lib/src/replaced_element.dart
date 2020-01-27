@@ -349,11 +349,14 @@ class RubyElement extends ReplacedElement {
   }
 }
 
-ReplacedElement parseReplacedElement(dom.Element element) {
+ReplacedElement parseReplacedElement(dom.Element element,
+  String urlFilter(String url)) {
+
   switch (element.localName) {
     case "audio":
       final sources = <String>[
-        if (element.attributes['src'] != null) element.attributes['src'],
+        if (element.attributes['src'] != null)
+          urlFilter(element.attributes['src']),
         ...ReplacedElement.parseMediaSources(element.children),
       ];
       return AudioContentElement(
@@ -373,20 +376,21 @@ ReplacedElement parseReplacedElement(dom.Element element) {
     case "iframe":
       return IframeContentElement(
         name: "iframe",
-        src: element.attributes['src'],
+        src: urlFilter(element.attributes['src']),
         width: double.tryParse(element.attributes['width'] ?? ""),
         height: double.tryParse(element.attributes['height'] ?? ""),
       );
     case "img":
       return ImageContentElement(
         name: "img",
-        src: element.attributes['src'],
+        src: urlFilter(element.attributes['src']),
         alt: element.attributes['alt'],
         node: element,
       );
     case "video":
       final sources = <String>[
-        if (element.attributes['src'] != null) element.attributes['src'],
+        if (element.attributes['src'] != null)
+          urlFilter(element.attributes['src']),
         ...ReplacedElement.parseMediaSources(element.children),
       ];
       return VideoContentElement(
