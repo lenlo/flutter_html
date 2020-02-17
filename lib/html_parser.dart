@@ -1,16 +1,16 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:csslib/parser.dart' as cssparser;
+import 'package:csslib/visitor.dart' as css;
+import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/src/html_elements.dart';
 import 'package:flutter_html/src/layout_element.dart';
 import 'package:flutter_html/src/utils.dart';
 import 'package:flutter_html/style.dart';
-import 'package:flutter/material.dart';
-import 'package:csslib/visitor.dart' as css;
 import 'package:html/dom.dart' as dom;
-import 'package:flutter_html/src/html_elements.dart';
 import 'package:html/parser.dart' as htmlparser;
-import 'package:csslib/parser.dart' as cssparser;
 
 typedef OnTap = void Function(String url);
 typedef CustomRender = Widget Function(
@@ -71,7 +71,7 @@ class HtmlParser extends StatelessWidget {
       cleanedTree,
     );
 
-    return RichText(text: parsedTree, textScaleFactor: textScaleFactor);
+    return StyledText(textSpan: parsedTree, style: cleanedTree.style);
   }
 
   /// [parseHTML] converts a string of HTML to a DOM document using the dart `html` library.
@@ -285,14 +285,15 @@ class HtmlParser extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(
                     left: 30), //TODO derive this from list padding.
-                child: RichText(
-                  text: TextSpan(
+                child: StyledText(
+                  textSpan: TextSpan(
                     children: tree.children
                             ?.map((tree) => parseTree(newContext, tree))
                             ?.toList() ??
                         [],
                     style: newContext.style.generateTextStyle(),
                   ),
+                  style: newContext.style,
                 ),
               )
             ],
@@ -321,14 +322,15 @@ class HtmlParser extends StatelessWidget {
               },
             ),
           },
-          child: RichText(
-            text: TextSpan(
+          child: StyledText(
+            textSpan: TextSpan(
               style: newContext.style.generateTextStyle(),
               children: tree.children
                       .map((tree) => parseTree(newContext, tree))
                       .toList() ??
                   [],
             ),
+            style: newContext.style,
           ),
         ),
       );
@@ -353,14 +355,15 @@ class HtmlParser extends StatelessWidget {
       return WidgetSpan(
         child: Transform.translate(
           offset: Offset(0, verticalOffset),
-          child: RichText(
-            text: TextSpan(
+          child: StyledText(
+            textSpan: TextSpan(
               style: newContext.style.generateTextStyle(),
               children: tree.children
                       .map((tree) => parseTree(newContext, tree))
                       .toList() ??
                   [],
             ),
+            style: newContext.style,
           ),
         ),
       );
@@ -407,6 +410,10 @@ class HtmlParser extends StatelessWidget {
     Context<bool> wpc,
   ) {
     if (tree.style.display == Display.BLOCK) {
+      wpc.data = false;
+    }
+    
+    if (tree is ImageContentElement || tree is SvgContentElement) {
       wpc.data = false;
     }
 
@@ -702,12 +709,36 @@ class ContainerSpan extends StatelessWidget {
       margin: style?.margin,
       alignment: shrinkWrap ? null : style?.alignment,
       child: child ??
-          RichText(
-            text: TextSpan(
+          StyledText(
+            textSpan: TextSpan(
               style: newContext.style.generateTextStyle(),
               children: children,
             ),
+            style: newContext.style,
           ),
+    );
+  }
+}
+
+class StyledText extends StatelessWidget {
+  final InlineSpan textSpan;
+  final Style style;
+
+  const StyledText({
+    this.textSpan,
+    this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: style.display == Display.BLOCK || style.display == Display.LIST_ITEM? double.infinity: null,
+      child: Text.rich(
+        textSpan,
+        style: style.generateTextStyle(),
+        textAlign: style.textAlign,
+        textDirection: style.direction,
+      ),
     );
   }
 }
