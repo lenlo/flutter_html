@@ -1026,11 +1026,7 @@ class HtmlRichTextParser extends StatelessWidget {
   }
 
   String condenseHtmlWhitespace(String stringToTrim) {
-    stringToTrim = stringToTrim.replaceAll("\n", " ");
-    while (stringToTrim.indexOf("  ") != -1) {
-      stringToTrim = stringToTrim.replaceAll("  ", " ");
-    }
-    return stringToTrim;
+    return stringToTrim.replaceAll(RegExp(r'\s+'), ' ');
   }
 
   String _effectiveUrl(String url) {
